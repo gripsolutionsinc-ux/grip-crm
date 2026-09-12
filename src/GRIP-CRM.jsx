@@ -121,9 +121,6 @@ export default function GRIPCRM() {
   const [filter, setFilter] = useState("All");
   const fileRef = useRef(null);
 
-  useEffect(() => { (async () => { const d = await loadStore(); setProjects(d || []); setLoaded(true); })(); }, []);
-  function persist(next) { setProjects(next); saveStore(next); }
-
   function openAdd() {
     setDraft({ id: uid(), client: "", address: "", jurisdiction: "", service: "Plan Review", status: "Intake", valuation: "", permits: false, disciplines: [], received: todayISO(), completed: "", notes: "", _new: true });
     setModal(true);
