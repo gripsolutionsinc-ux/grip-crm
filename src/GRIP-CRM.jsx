@@ -55,15 +55,27 @@ const svc = (name) => SERVICE_TYPES.find((s) => s.name === name) || SERVICE_TYPE
 
 /* ===================== STORAGE (persistent) ===================== */
 async function loadStore() {
-  if (typeof window === "undefined" || !window.storage) return null;
-  try {
-    const r = await window.storage.get(STORE_KEY);
-    return r && r.value ? JSON.parse(r.value) : [];
-  } catch (e) { return []; }
+  const { data, error } = await supabase
+    .from("projects")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Supabase load error:", error);
+    return [];
+  }
+
+  return data || [];
 }
+
 async function saveStore(list) {
-  if (typeof window === "undefined" || !window.storage) return;
-  try { await window.storage.set(STORE_KEY, JSON.stringify(list)); } catch (e) {}
+  const { error } = await supabase
+    .from("projects")
+    .upsert(list);
+
+  if (error) {
+    console.error("Supabase save error:", error);
+  }
 }
 
 const SAMPLE = [
