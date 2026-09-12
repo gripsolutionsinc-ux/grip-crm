@@ -151,29 +151,133 @@ export default function GRIPCRM() {
         input,select,textarea{font-family:'Spline Sans',sans-serif}
         ::-webkit-scrollbar{height:8px;width:8px}::-webkit-scrollbar-thumb{background:#cdd9dd;border-radius:8px}`}</style>
 
-      {/* HEADER */}
-      <header style={{ background: C.white, borderBottom: `1px solid ${C.line}`, position: "sticky", top: 0, zIndex: 30 }}>
-        <div style={{ maxWidth: 1180, margin: "0 auto", padding: "12px 22px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <img src={LOGO} alt="GRIP Solutions" style={{ height: 42, width: "auto", objectFit: "contain" }} />
-            <div>
-              <div style={{ ...serif, fontWeight: 700, fontSize: 18, color: C.navy, lineHeight: 1 }}>GRIP CRM</div>
-              <div style={{ fontSize: 11, color: C.muted, letterSpacing: ".04em" }}>Project &amp; Performance Tracker</div>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <Btn onClick={exportCSV} ghost icon={Download}>CSV</Btn>
-            <Btn onClick={backupJSON} ghost icon={Database}>Backup</Btn>
-            <Btn onClick={() => fileRef.current && fileRef.current.click()} ghost icon={Upload}>Restore</Btn>
-            <input ref={fileRef} type="file" accept="application/json" onChange={restoreJSON} style={{ display: "none" }} />
-            <Btn onClick={openAdd} icon={Plus}>Add Project</Btn>
-          </div>
+    {/* HEADER */}
+<header style={{
+  background: C.white,
+  borderBottom: `1px solid ${C.line}`,
+  position: "sticky",
+  top: 0,
+  zIndex: 30
+}}>
+  <div style={{
+    maxWidth: 1180,
+    margin: "0 auto",
+    padding: "12px clamp(12px, 4vw, 22px)",
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 16
+  }}>
+
+    {/* BRAND */}
+    <div style={{
+      display: "flex",
+      flexWrap: "wrap",
+      alignItems: "center",
+      gap: 10,
+      flex: "1 1 auto",
+      minWidth: 220
+    }}>
+      <img 
+        src={LOGO} 
+        alt="GRIP Solutions" 
+        style={{
+          height: "clamp(32px, 6vw, 42px)",
+          width: "auto",
+          objectFit: "contain"
+        }} 
+      />
+
+      <div>
+        <div style={{
+          ...serif,
+          fontWeight: 700,
+          fontSize: "clamp(16px, 3vw, 18px)",
+          color: C.navy,
+          lineHeight: 1
+        }}>
+          GRIP CRM
         </div>
-        <div style={{ maxWidth: 1180, margin: "0 auto", padding: "0 22px", display: "flex", gap: 4 }}>
-          <Tab active={view === "dashboard"} onClick={() => setView("dashboard")} icon={LayoutDashboard}>Dashboard</Tab>
-          <Tab active={view === "projects"} onClick={() => setView("projects")} icon={FolderKanban}>Projects ({projects.length})</Tab>
+
+        <div style={{
+          fontSize: "clamp(10px, 2vw, 11px)",
+          color: C.muted,
+          letterSpacing: ".04em"
+        }}>
+          Project &amp; Performance Tracker
         </div>
-      </header>
+      </div>
+    </div>
+
+
+    {/* ACTION BUTTONS */}
+    <div style={{
+      display: "flex",
+      gap: 8,
+      flexWrap: "wrap",
+      justifyContent: "flex-end",
+      flex: "0 1 auto"
+    }}>
+      <Btn onClick={exportCSV} ghost icon={Download}>
+        CSV
+      </Btn>
+
+      <Btn onClick={backupJSON} ghost icon={Database}>
+        Backup
+      </Btn>
+
+      <Btn 
+        onClick={() => fileRef.current && fileRef.current.click()} 
+        ghost 
+        icon={Upload}
+      >
+        Restore
+      </Btn>
+
+      <input 
+        ref={fileRef}
+        type="file"
+        accept="application/json"
+        onChange={restoreJSON}
+        style={{ display:"none" }}
+      />
+
+      <Btn onClick={openAdd} icon={Plus}>
+        Add Project
+      </Btn>
+    </div>
+
+  </div>
+
+
+  {/* TABS */}
+  <div style={{
+    maxWidth:1180,
+    margin:"0 auto",
+    padding:"0 clamp(12px, 4vw, 22px)",
+    display:"flex",
+    gap:4,
+    overflowX:"auto"
+  }}>
+    <Tab 
+      active={view === "dashboard"} 
+      onClick={() => setView("dashboard")} 
+      icon={LayoutDashboard}
+    >
+      Dashboard
+    </Tab>
+
+    <Tab 
+      active={view === "projects"} 
+      onClick={() => setView("projects")} 
+      icon={FolderKanban}
+    >
+      Projects ({projects.length})
+    </Tab>
+  </div>
+
+</header>
 
       <main style={{ maxWidth: 1180, margin: "0 auto", padding: "26px 22px 60px" }}>
         {!loaded && <div style={{ color: C.muted, padding: 40, textAlign: "center" }}>Loading your data…</div>}
@@ -215,11 +319,11 @@ function Dashboard({ M, serif, onAdd, onSeed, empty }) {
               <div style={{ fontSize: 12.5, color: C.sub, fontWeight: 500 }}>{c.label}</div>
               <div style={{ width: 34, height: 34, borderRadius: 9, background: c.color, display: "grid", placeItems: "center", color: "#fff" }}><c.icon size={18} /></div>
             </div>
-            <div style={{ ...serif, fontSize: 30, fontWeight: 600, color: C.navy, marginTop: 8 }}>{c.value}</div>
+            <div style={{ ...serif, fontSize:"clamp(22px,5vw,30px), fontWeight: 600, color: C.navy, marginTop: 8 }}>{c.value}</div>
           </div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))", gap: 16 }}>
         <Panel title="Avg turnaround by service (days)" serif={serif}>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={M.byType} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
@@ -315,13 +419,26 @@ function Modal({ draft, setDraft, onSave, onClose, toggleDisc, serif }) {
   const set = (k, v) => setDraft({ ...draft, [k]: v });
   const turn = daysBetween(draft.received, draft.completed);
   return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(19,28,66,.6)", backdropFilter: "blur(3px)", zIndex: 60, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 16px", overflow: "auto" }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: "#fff", borderRadius: 18, width: "100%", maxWidth: 640, padding: "26px 28px 30px", boxShadow: "0 30px 80px -30px rgba(0,0,0,.6)" }}>
+<div 
+  onClick={(e) => e.stopPropagation()} 
+  style={{ 
+    background: "#fff",
+    borderRadius: 18,
+    width: "100%",
+    maxWidth: 640,
+    padding: "clamp(16px, 4vw, 28px)",
+    boxShadow: "0 30px 80px -30px rgba(0,0,0,.6)"
+  }}
+>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <h3 style={{ ...serif, fontSize: 22, color: C.navy, margin: 0 }}>{draft._new ? "New project" : "Edit project"}</h3>
           <button onClick={onClose} style={{ ...iconBtn, fontSize: 20 }}><X size={20} /></button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div style={{ 
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gap: 14
+}}>
           <Field label="Client name *"><input style={inp} value={draft.client} onChange={(e) => set("client", e.target.value)} /></Field>
           <Field label="Jurisdiction / municipality"><input style={inp} value={draft.jurisdiction} onChange={(e) => set("jurisdiction", e.target.value)} placeholder="City of …" /></Field>
           <Field label="Project address *" span><input style={inp} value={draft.address} onChange={(e) => set("address", e.target.value)} /></Field>
@@ -360,7 +477,12 @@ function Modal({ draft, setDraft, onSave, onClose, toggleDisc, serif }) {
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20 }}>
           <div style={{ fontSize: 13, color: C.sub }}>{turn == null ? "Turnaround calculates once both dates are set." : <span>Turnaround: <b style={{ color: C.navy }}>{turn} days</b></span>}</div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ 
+  display: "flex",
+  gap: 8,
+  flexWrap: "wrap",
+  justifyContent: "flex-end"
+}}>
             <Btn onClick={onClose} ghost>Cancel</Btn>
             <Btn onClick={onSave} icon={Save}>Save project</Btn>
           </div>
@@ -401,13 +523,28 @@ function Tab({ active, onClick, icon: Icon, children }) {
 }
 function Btn({ onClick, children, ghost, icon: Icon }) {
   return (
-    <button onClick={onClick} style={{
-      display: "inline-flex", alignItems: "center", gap: 7, padding: "9px 15px", borderRadius: 10, cursor: "pointer",
-      fontSize: 13.5, fontWeight: 600, fontFamily: "'Spline Sans',sans-serif",
-      border: ghost ? `1px solid ${C.line}` : "none",
-      background: ghost ? "#fff" : `linear-gradient(135deg, ${C.teal}, ${C.aqua})`,
-      color: ghost ? C.sub : "#fff",
-    }}>{Icon && <Icon size={16} />}{children}</button>
+    <button 
+      onClick={onClick}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 7,
+        padding: "9px 15px",
+        borderRadius: 10,
+        cursor: "pointer",
+        fontSize: window.innerWidth < 600 ? 12 : 13.5,
+        fontWeight: 600,
+        fontFamily: "'Spline Sans',sans-serif",
+        border: ghost ? `1px solid ${C.line}` : "none",
+        background: ghost ? "#fff" : `linear-gradient(135deg, ${C.teal}, ${C.aqua})`,
+        color: ghost ? C.sub : "#fff",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {Icon && <Icon size={window.innerWidth < 600 ? 14 : 16} />}
+      {children}
+    </button>
   );
 }
 function Badge({ color, children }) {
