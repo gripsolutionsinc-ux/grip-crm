@@ -488,7 +488,6 @@ function Modal({ draft, setDraft, onSave, onClose, toggleDisc, serif }) {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
