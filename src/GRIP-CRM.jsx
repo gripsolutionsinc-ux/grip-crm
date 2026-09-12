@@ -418,79 +418,260 @@ function Projects({ filtered, query, setQuery, filter, setFilter, openAdd, openE
 function Modal({ draft, setDraft, onSave, onClose, toggleDisc, serif }) {
   const set = (k, v) => setDraft({ ...draft, [k]: v });
   const turn = daysBetween(draft.received, draft.completed);
+
   return (
-<div 
-  onClick={(e) => e.stopPropagation()} 
-  style={{ 
-    background: "#fff",
-    borderRadius: 18,
-    width: "100%",
-    maxWidth: 640,
-    padding: "clamp(16px, 4vw, 28px)",
-    boxShadow: "0 30px 80px -30px rgba(0,0,0,.6)"
-  }}
->
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h3 style={{ ...serif, fontSize: 22, color: C.navy, margin: 0 }}>{draft._new ? "New project" : "Edit project"}</h3>
-          <button onClick={onClose} style={{ ...iconBtn, fontSize: 20 }}><X size={20} /></button>
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(19,28,66,.6)",
+        backdropFilter: "blur(3px)",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px 12px",
+        overflowY: "auto"
+      }}
+    >
+
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "#fff",
+          borderRadius: 18,
+          width: "100%",
+          maxWidth: 640,
+          maxHeight: "90vh",
+          overflowY: "auto",
+          padding: "clamp(16px,4vw,28px)",
+          boxShadow: "0 30px 80px -30px rgba(0,0,0,.6)"
+        }}
+      >
+
+        <div style={{
+          display:"flex",
+          justifyContent:"space-between",
+          alignItems:"center",
+          marginBottom:16
+        }}>
+
+          <h3 style={{
+            ...serif,
+            fontSize:"clamp(18px,4vw,22px)",
+            color:C.navy,
+            margin:0
+          }}>
+            {draft._new ? "New project" : "Edit project"}
+          </h3>
+
+          <button 
+            onClick={onClose}
+            style={{...iconBtn,fontSize:20}}
+          >
+            <X size={20}/>
+          </button>
+
         </div>
-        <div style={{ 
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-  gap: 14
-}}>
-          <Field label="Client name *"><input style={inp} value={draft.client} onChange={(e) => set("client", e.target.value)} /></Field>
-          <Field label="Jurisdiction / municipality"><input style={inp} value={draft.jurisdiction} onChange={(e) => set("jurisdiction", e.target.value)} placeholder="City of …" /></Field>
-          <Field label="Project address *" span><input style={inp} value={draft.address} onChange={(e) => set("address", e.target.value)} /></Field>
+
+
+        <div style={{
+          display:"grid",
+          gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",
+          gap:14
+        }}>
+
+
+          <Field label="Client name *">
+            <input 
+              style={inp}
+              value={draft.client}
+              onChange={(e)=>set("client",e.target.value)}
+            />
+          </Field>
+
+
+          <Field label="Jurisdiction / municipality">
+            <input
+              style={inp}
+              value={draft.jurisdiction}
+              placeholder="City of ..."
+              onChange={(e)=>set("jurisdiction",e.target.value)}
+            />
+          </Field>
+
+
+          <Field label="Project address *" span>
+            <input
+              style={inp}
+              value={draft.address}
+              onChange={(e)=>set("address",e.target.value)}
+            />
+          </Field>
+
+
           <Field label="Service type">
-            <select style={inp} value={draft.service} onChange={(e) => set("service", e.target.value)}>
-              {SERVICE_TYPES.map((s) => <option key={s.name}>{s.name}</option>)}
+            <select
+              style={inp}
+              value={draft.service}
+              onChange={(e)=>set("service",e.target.value)}
+            >
+              {SERVICE_TYPES.map(s=>
+                <option key={s.name}>{s.name}</option>
+              )}
             </select>
           </Field>
+
+
           <Field label="Status">
-            <select style={inp} value={draft.status} onChange={(e) => set("status", e.target.value)}>
-              {STATUSES.map((s) => <option key={s}>{s}</option>)}
+            <select
+              style={inp}
+              value={draft.status}
+              onChange={(e)=>set("status",e.target.value)}
+            >
+              {STATUSES.map(s=>
+                <option key={s}>{s}</option>
+              )}
             </select>
           </Field>
-          <Field label="Job valuation ($)"><input style={inp} type="number" value={draft.valuation} onChange={(e) => set("valuation", e.target.value)} placeholder="0" /></Field>
-          <Field label="Permits required?">
-            <div style={{ display: "flex", gap: 8 }}>
-              {["Yes", "No"].map((o) => {
-                const on = (o === "Yes") === !!draft.permits;
-                return <button key={o} onClick={() => set("permits", o === "Yes")} style={{ flex: 1, padding: "9px 0", borderRadius: 9, border: `1px solid ${on ? C.teal : C.line}`, background: on ? C.teal : "#fff", color: on ? "#fff" : C.sub, fontWeight: 600, cursor: "pointer", fontSize: 14 }}>{o}</button>;
-              })}
-            </div>
+
+
+          <Field label="Job valuation ($)">
+            <input
+              style={inp}
+              type="number"
+              value={draft.valuation}
+              onChange={(e)=>set("valuation",e.target.value)}
+            />
           </Field>
-          {draft.permits && (
-            <Field label="Permit disciplines" span>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-                {DISCIPLINES.map((d) => {
-                  const on = draft.disciplines.includes(d);
-                  return <button key={d} onClick={() => toggleDisc(d)} style={{ padding: "6px 11px", borderRadius: 999, border: `1px solid ${on ? C.aqua : C.line}`, background: on ? "rgba(32,178,170,.12)" : "#fff", color: on ? C.teal700 : C.sub, fontWeight: 600, fontSize: 12.5, cursor: "pointer" }}>{d}</button>;
-                })}
-              </div>
-            </Field>
-          )}
-          <Field label="Date received (incoming)"><input style={inp} type="date" value={draft.received} onChange={(e) => set("received", e.target.value)} /></Field>
-          <Field label="Date completed (outgoing)"><input style={inp} type="date" value={draft.completed} onChange={(e) => set("completed", e.target.value)} /></Field>
-          <Field label="Notes" span><textarea style={{ ...inp, minHeight: 70, resize: "vertical" }} value={draft.notes} onChange={(e) => set("notes", e.target.value)} /></Field>
+
+
+          <Field label="Permits required?">
+
+            <div style={{
+              display:"flex",
+              gap:8
+            }}>
+
+            {["Yes","No"].map(o=>{
+
+              const active=(o==="Yes")===!!draft.permits;
+
+              return(
+                <button
+                  key={o}
+                  onClick={()=>set("permits",o==="Yes")}
+                  style={{
+                    flex:1,
+                    padding:"9px 0",
+                    borderRadius:9,
+                    border:`1px solid ${active?C.teal:C.line}`,
+                    background:active?C.teal:"#fff",
+                    color:active?"#fff":C.sub,
+                    fontWeight:600
+                  }}
+                >
+                  {o}
+                </button>
+              )
+
+            })}
+
+            </div>
+
+          </Field>
+
+
+
+          <Field label="Date received (incoming)">
+            <input
+              style={inp}
+              type="date"
+              value={draft.received}
+              onChange={(e)=>set("received",e.target.value)}
+            />
+          </Field>
+
+
+          <Field label="Date completed (outgoing)">
+            <input
+              style={inp}
+              type="date"
+              value={draft.completed}
+              onChange={(e)=>set("completed",e.target.value)}
+            />
+          </Field>
+
+
+          <Field label="Notes" span>
+            <textarea
+              style={{
+                ...inp,
+                minHeight:70,
+                resize:"vertical"
+              }}
+              value={draft.notes}
+              onChange={(e)=>set("notes",e.target.value)}
+            />
+          </Field>
+
+
         </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20 }}>
-          <div style={{ fontSize: 13, color: C.sub }}>{turn == null ? "Turnaround calculates once both dates are set." : <span>Turnaround: <b style={{ color: C.navy }}>{turn} days</b></span>}</div>
-          <div style={{ 
-  display: "flex",
-  gap: 8,
-  flexWrap: "wrap",
-  justifyContent: "flex-end"
-}}>
-            <Btn onClick={onClose} ghost>Cancel</Btn>
-            <Btn onClick={onSave} icon={Save}>Save project</Btn>
+
+
+
+        <div style={{
+          display:"flex",
+          flexWrap:"wrap",
+          gap:12,
+          alignItems:"center",
+          justifyContent:"space-between",
+          marginTop:20
+        }}>
+
+          <div style={{
+            fontSize:13,
+            color:C.sub
+          }}>
+            {turn==null 
+            ? "Turnaround calculates once both dates are set."
+            :
+            <span>
+              Turnaround:
+              <b style={{color:C.navy}}>
+                {turn} days
+              </b>
+            </span>
+            }
           </div>
+
+
+          <div style={{
+            display:"flex",
+            gap:8,
+            flexWrap:"wrap",
+            justifyContent:"flex-end"
+          }}>
+
+            <Btn onClick={onClose} ghost>
+              Cancel
+            </Btn>
+
+            <Btn onClick={onSave} icon={Save}>
+              Save project
+            </Btn>
+
+          </div>
+
         </div>
+
+
       </div>
+
+    </div>
   );
 }
-
 /* ===================== SMALL UI ===================== */
 function Empty({ serif, onAdd, onSeed }) {
   return (
