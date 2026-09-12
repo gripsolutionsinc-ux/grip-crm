@@ -53,7 +53,7 @@ const fmtMoney = (n) => "$" + (Number(n) || 0).toLocaleString("en-US");
 const fmtDate = (s) => s ? new Date(s + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—";
 const svc = (name) => SERVICE_TYPES.find((s) => s.name === name) || SERVICE_TYPES[0];
 
-/* ===================== STORAGE (persistent) ===================== */
+/* ================= STORAGE (Supabase) ================= */
 async function loadStore() {
   const { data, error } = await supabase
     .from("projects")
@@ -68,10 +68,13 @@ async function loadStore() {
   return data || [];
 }
 
+
 async function saveStore(list) {
   const { error } = await supabase
     .from("projects")
-    .upsert(list);
+    .upsert(list, {
+      onConflict: "id"
+    });
 
   if (error) {
     console.error("Supabase save error:", error);
@@ -79,12 +82,33 @@ async function saveStore(list) {
 }
 
 const SAMPLE = [
-  { id: uid(), client: "Pulley Residence", address: "8421 Equestrian Way, Parkland, FL", jurisdiction: "City of Parkland", service: "Plan Review + Inspection", status: "In Plan Review", valuation: 1850000, permits: true, disciplines: ["Building", "Electrical", "Plumbing", "Structural"], received: addDays(-9), completed: "", notes: "Phase 2 new construction. Concierge tier." },
-  { id: uid(), client: "Ocean Breeze Roofing", address: "1613 SE Port St Lucie Blvd, Port St. Lucie, FL", jurisdiction: "St. Lucie County", service: "Plan Review", status: "Approved", valuation: 34908, permits: true, disciplines: ["Building", "Roofing"], received: addDays(-12), completed: addDays(-5), notes: "Tile roof replacement. Inspections only follow-on." },
-  { id: uid(), client: "Galleria Redevelopment", address: "2nd Ave N, West Palm Beach, FL", jurisdiction: "City of WPB", service: "Permit Expediting", status: "Permitting / Expediting", valuation: 12500000, permits: true, disciplines: ["Building", "Electrical", "Mechanical", "Plumbing", "Fire / Life Safety"], received: addDays(-21), completed: "", notes: "Crescent Heights. Multi-discipline coordination." },
-  { id: uid(), client: "Westlake Spec Home", address: "16 Banyan Blvd, Westlake, FL", jurisdiction: "City of Westlake", service: "Plan Review", status: "Comments Issued", valuation: 420000, permits: true, disciplines: ["Building", "Mechanical"], received: addDays(-6), completed: "", notes: "Comments issued day 4. Awaiting resubmittal." },
+  {
+    id: uid(),
+    client: "Pulley Residence",
+    address: "8421 Equestrian Way, Parkland, FL",
+    jurisdiction: "City of Parkland",
+    service: "Plan Review + Inspection",
+    status: "In Plan Review",
+    valuation: 1850000,
+    permits: true,
+    disciplines: [
+      "Building",
+      "Electrical",
+      "Plumbing",
+      "Structural"
+    ],
+    received: addDays(-9),
+    completed: "",
+    notes: "Phase 2 new construction."
+  }
 ];
-function addDays(n) { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+
+
+function addDays(n) {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0,10);
+}
 
 /* ===================== APP ===================== */
 export default function GRIPCRM() {
