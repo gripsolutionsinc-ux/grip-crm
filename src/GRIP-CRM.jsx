@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
+
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid,
+  BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, Cell, CartesianGrid,
 } from "recharts";
+
 import {
   LayoutDashboard, FolderKanban, Plus, Download, Save, Search, Trash2,
   Pencil, X, Clock, Layers, DollarSign, FileText, ClipboardCheck, Stamp,
   Briefcase, Database, Upload,
 } from "lucide-react";
+
+import { supabase } from "./supabase";
 
 /* ===================== BRAND ===================== */
 const C = {
