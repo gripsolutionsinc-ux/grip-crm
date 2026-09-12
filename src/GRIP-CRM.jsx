@@ -319,7 +319,7 @@ function Dashboard({ M, serif, onAdd, onSeed, empty }) {
               <div style={{ fontSize: 12.5, color: C.sub, fontWeight: 500 }}>{c.label}</div>
               <div style={{ width: 34, height: 34, borderRadius: 9, background: c.color, display: "grid", placeItems: "center", color: "#fff" }}><c.icon size={18} /></div>
             </div>
-            <div style={{ ...serif, fontSize:"clamp(22px,5vw,30px), fontWeight: 600, color: C.navy, marginTop: 8 }}>{c.value}</div>
+            <div style={{ ...serif, fontSize: "clamp(22px, 5vw, 30px)", fontWeight: 600, color: C.navy, marginTop: 8 }}>{c.value}</div>
           </div>
         ))}
       </div>
