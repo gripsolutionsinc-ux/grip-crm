@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { supabase } from "./supabase";
 
@@ -27,11 +28,10 @@ export default function Login() {
           "Registration submitted. Please check your email to confirm your account."
         );
       } else {
-        const { error } =
-          await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password,
-          });
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
         if (error) throw error;
       }
     } catch (err) {
@@ -85,37 +85,71 @@ export default function Login() {
             style={inputStyle}
           />
 
-         
-<label>Password</label>
-<div style={{ position: "relative" }}>
-  <input
-    type={showPassword ? "text" : "password"}
-    required
-    minLength={mode === "signup" ? 12 : undefined}
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    style={{ ...inputStyle, paddingRight: 75 }}
-  />
-  <button
-    type="button"
-    onClick={() => setShowPassword(!showPassword)}
-    aria-label={showPassword ? "Hide password" : "Show password"}
-    aria-pressed={showPassword}
-    style={{
-      position: "absolute",
-      right: 12,
-      top: 18,
-      background: "none",
-      border: "none",
-      color: "#008b8b",
-      cursor: "pointer",
-      fontSize: 13,
-      fontWeight: "bold"
-    }}
-  >
-    {showPassword ? "Hide" : "Show"}
-  </button>
-</div>
+          <label>Password</label>
+          <div style={{ position: "relative" }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              minLength={mode === "signup" ? 12 : undefined}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ ...inputStyle, paddingRight: 48 }}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              title={showPassword ? "Hide password" : "Show password"}
+              style={{
+                position: "absolute",
+                right: 12,
+                top: 18,
+                background: "none",
+                border: "none",
+                color: "#008b8b",
+                cursor: "pointer",
+                padding: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              {showPassword ? (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 3l18 18" />
+                  <path d="M10.6 10.6a2 2 0 002.8 2.8" />
+                  <path d="M9.9 5.2A10.8 10.8 0 0112 5c5 0 9 4 10 7a13 13 0 01-3.1 4.4" />
+                  <path d="M6.3 6.3C4.2 7.7 2.7 9.7 2 12c1 3 5 7 10 7a10.8 10.8 0 005.7-1.6" />
+                </svg>
+              ) : (
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
+          </div>
 
           {error && (
             <p role="alert" style={{ color: "#b91c1c" }}>
@@ -160,6 +194,8 @@ export default function Login() {
             type="button"
             onClick={() => {
               setMode(mode === "login" ? "signup" : "login");
+              setPassword("");
+              setShowPassword(false);
               setError("");
               setMessage("");
             }}
