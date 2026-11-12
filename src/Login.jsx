@@ -5,6 +5,7 @@ export default function Login() {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -84,15 +85,37 @@ export default function Login() {
             style={inputStyle}
           />
 
-          <label>Password</label>
-          <input
-            type="password"
-            required
-            minLength={mode === "signup" ? 12 : undefined}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={inputStyle}
-          />
+         
+<label>Password</label>
+<div style={{ position: "relative" }}>
+  <input
+    type={showPassword ? "text" : "password"}
+    required
+    minLength={mode === "signup" ? 12 : undefined}
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    style={{ ...inputStyle, paddingRight: 75 }}
+  />
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    aria-label={showPassword ? "Hide password" : "Show password"}
+    aria-pressed={showPassword}
+    style={{
+      position: "absolute",
+      right: 12,
+      top: 18,
+      background: "none",
+      border: "none",
+      color: "#008b8b",
+      cursor: "pointer",
+      fontSize: 13,
+      fontWeight: "bold"
+    }}
+  >
+    {showPassword ? "Hide" : "Show"}
+  </button>
+</div>
 
           {error && (
             <p role="alert" style={{ color: "#b91c1c" }}>
