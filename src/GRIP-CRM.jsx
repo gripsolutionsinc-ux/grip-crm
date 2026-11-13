@@ -7,6 +7,7 @@ import {
   Pencil, X, Clock, Layers, DollarSign, FileText, ClipboardCheck, Stamp,
   Briefcase, Database, Upload,
 } from "lucide-react";
+import { supabase } from "./supabase";
 
 /* ===================== BRAND ===================== */
 const C = {
