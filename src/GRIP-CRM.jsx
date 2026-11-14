@@ -38,7 +38,8 @@ const REVIEW_TYPES = ["Plan Review", "Plan Review + Inspection"];
 const STORE_KEY = "grip_crm_projects_v1";
 
 /* ===================== HELPERS ===================== */
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+const uid = () => crypto.randomUUID(); 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 function daysBetween(a, b) {
   if (!a || !b) return null;
@@ -50,16 +51,33 @@ const fmtDate = (s) => s ? new Date(s + "T00:00:00").toLocaleDateString("en-US",
 const svc = (name) => SERVICE_TYPES.find((s) => s.name === name) || SERVICE_TYPES[0];
 
 /* ===================== STORAGE (persistent) ===================== */
+
 async function loadStore() {
-  if (typeof window === "undefined" || !window.storage) return null;
-  try {
-    const r = await window.storage.get(STORE_KEY);
-    return r && r.value ? JSON.parse(r.value) : [];
-  } catch (e) { return []; }
-}
-async function saveStore(list) {
-  if (typeof window === "undefined" || !window.storage) return;
-  try { await window.storage.set(STORE_KEY, JSON.stringify(list)); } catch (e) {}
+  const { data, error } = await supabase
+    .from("projects")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error loading projects:", error);
+    throw error;
+  }
+
+  return (data || []).map((p) => ({
+    id: p.id,
+    client: p.client_name || "",
+    address: p.address || "",
+    jurisdiction: p.jurisdiction || "",
+    service: p.project_type || "Plan Review",
+    status: p.status || "Intake",
+    valuation: Number(p.valuation) || 0,
+    permits: p.permits ?? false,
+    disciplines: p.disciplines || [],
+    received: p.received || "",
+    completed: p.completed || "",
+    notes: p.notes || "",
+    client_user_id: p.client_user_id
+  }));
 }
 
 const SAMPLE = [
@@ -81,27 +99,99 @@ export default function GRIPCRM() {
   const [filter, setFilter] = useState("All");
   const fileRef = useRef(null);
 
-  useEffect(() => { (async () => { const d = await loadStore(); setProjects(d || []); setLoaded(true); })(); }, []);
-  function persist(next) { setProjects(next); saveStore(next); }
+useEffect(() => {
+  let active = true;
+
+  async function fetchProjects() {
+    try {
+      const data = await loadStore();
+      if (active) setProjects(data);
+    } catch (error) {
+      console.error("Unable to load projects:", error);
+      if (active) alert("Unable to load projects from Supabase.");
+    } finally {
+      if (active) setLoaded(true);
+    }
+  }
+
+  fetchProjects();
+
+  return () => {
+    active = false;
+  };
+}, []);
 
   function openAdd() {
     setDraft({ id: uid(), client: "", address: "", jurisdiction: "", service: "Plan Review", status: "Intake", valuation: "", permits: false, disciplines: [], received: todayISO(), completed: "", notes: "", _new: true });
     setModal(true);
   }
   function openEdit(p) { setDraft({ ...p }); setModal(true); }
-  function saveDraft() {
-    if (!draft.client.trim() || !draft.address.trim()) { alert("Client name and project address are required."); return; }
-    const clean = { ...draft }; delete clean._new;
-    clean.valuation = Number(clean.valuation) || 0;
-    const exists = projects.some((p) => p.id === clean.id);
-    persist(exists ? projects.map((p) => (p.id === clean.id ? clean : p)) : [clean, ...projects]);
-    setModal(false); setDraft(null);
+async function saveDraft() {
+  if (!draft.client.trim() || !draft.address.trim()) {
+    alert("Client name and project address are required.");
+    return;
   }
-  function remove(id) { if (confirm("Delete this project?")) persist(projects.filter((p) => p.id !== id)); }
-  function toggleDisc(d) {
-    const has = draft.disciplines.includes(d);
-    setDraft({ ...draft, disciplines: has ? draft.disciplines.filter((x) => x !== d) : [...draft.disciplines, d] });
+
+  const clean = { ...draft };
+  const isNew = Boolean(clean._new);
+  delete clean._new;
+
+  const record = {
+    client_name: clean.client,
+    project_name: clean.address,
+    address: clean.address,
+    jurisdiction: clean.jurisdiction,
+    project_type: clean.service,
+    status: clean.status,
+    valuation: Number(clean.valuation) || 0,
+    permits: clean.permits,
+    disciplines: clean.disciplines,
+    received: clean.received || null,
+    completed: clean.completed || null,
+    notes: clean.notes
+  };
+
+  try {
+    const query = isNew
+      ? supabase.from("projects").insert(record)
+      : supabase.from("projects").update(record).eq("id", clean.id);
+
+    const { error } = await query;
+
+    if (error) throw error;
+
+    const updated = await loadStore();
+    setProjects(updated);
+    setModal(false);
+    setDraft(null);
+  } catch (error) {
+    console.error("Error saving project:", error);
+    alert("Unable to save project. Please try again.");
   }
+}
+ 
+async function remove(id) {
+  if (!confirm("Delete this project?")) return;
+
+  try {
+    const { data, error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", id)
+      .select("id");
+
+    if (error) throw error;
+    if (!data?.length) {
+      throw new Error("Project was not deleted.");
+    }
+
+    const updated = await loadStore();
+    setProjects(updated);
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    alert("Unable to delete project. Please try again.");
+  }
+}
 
   /* ---- export / backup / restore ---- */
   function download(name, text, type) {
@@ -115,12 +205,10 @@ export default function GRIPCRM() {
     download("GRIP-CRM-export.csv", [cols, ...rows].map((r) => r.map(esc).join(",")).join("\n"), "text/csv");
   }
   function backupJSON() { download("GRIP-CRM-backup.json", JSON.stringify(projects, null, 2), "application/json"); }
-  function restoreJSON(e) {
-    const f = e.target.files[0]; if (!f) return;
-    const r = new FileReader();
-    r.onload = () => { try { const d = JSON.parse(r.result); if (Array.isArray(d)) { persist(d); alert("Restored " + d.length + " projects."); } } catch (err) { alert("Could not read that file."); } };
-    r.readAsText(f); e.target.value = "";
-  }
+function restoreJSON(e) {
+  alert("JSON restore is temporarily disabled while using Supabase.");
+  e.target.value = "";
+}
 
   /* ---- metrics ---- */
   const M = useMemo(() => {
@@ -284,7 +372,7 @@ export default function GRIPCRM() {
         {!loaded && <div style={{ color: C.muted, padding: 40, textAlign: "center" }}>Loading your data…</div>}
 
         {loaded && view === "dashboard" && (
-          <Dashboard M={M} projects={projects} serif={serif} onAdd={openAdd} onSeed={() => persist(SAMPLE)} empty={projects.length === 0} />
+          <Dashboard M={M} projects={projects} serif={serif} onAdd={openAdd} onSeed={() => alert("Sample projects are disabled while using Supabase.")} empty={projects.length === 0} />
         )}
 
         {loaded && view === "projects" && (
